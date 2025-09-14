@@ -117,8 +117,25 @@ describe('api', () => {
       mockGenerateContent.mockResolvedValue(mockResponse);
     });
 
-    test('generateComponentRequirements should generate requirements', async () => {
+    test('generateComponentRequirements should generate requirements without project context', async () => {
       const result = await generateComponentRequirements('Test Component', 'A test component');
+      
+      expect(mockGetGenerativeModel).toHaveBeenCalledWith({ model: 'gemini-1.5-flash' });
+      expect(mockGenerateContent).toHaveBeenCalled();
+      expect(result).toBe('Generated content');
+    });
+
+    test('generateComponentRequirements should generate requirements with project context', async () => {
+      const mockProjectSpec = {
+        title: 'Test Project',
+        sections: {
+          planning: { content: 'Project planning content' },
+          design: { content: 'Project design content' },
+          implementation: { content: 'Project implementation content' }
+        }
+      };
+      
+      const result = await generateComponentRequirements('Test Component', 'A test component', mockProjectSpec);
       
       expect(mockGetGenerativeModel).toHaveBeenCalledWith({ model: 'gemini-1.5-flash' });
       expect(mockGenerateContent).toHaveBeenCalled();
@@ -133,8 +150,22 @@ describe('api', () => {
       expect(result).toContain('Error generating requirements: Generation failed');
     });
 
-    test('generateComponentDesign should generate design', async () => {
+    test('generateComponentDesign should generate design without project context', async () => {
       const result = await generateComponentDesign('Test Component', 'A test component', 'Requirements content');
+      
+      expect(mockGetGenerativeModel).toHaveBeenCalledWith({ model: 'gemini-1.5-flash' });
+      expect(mockGenerateContent).toHaveBeenCalled();
+      expect(result).toBe('Generated content');
+    });
+
+    test('generateComponentDesign should generate design with project context', async () => {
+      const mockProjectSpec = {
+        sections: {
+          design: { content: 'Project design content' }
+        }
+      };
+      
+      const result = await generateComponentDesign('Test Component', 'A test component', 'Requirements content', mockProjectSpec);
       
       expect(mockGetGenerativeModel).toHaveBeenCalledWith({ model: 'gemini-1.5-flash' });
       expect(mockGenerateContent).toHaveBeenCalled();
@@ -149,8 +180,22 @@ describe('api', () => {
       expect(result).toContain('Error generating design: Generation failed');
     });
 
-    test('generateComponentTasks should generate tasks', async () => {
+    test('generateComponentTasks should generate tasks without project context', async () => {
       const result = await generateComponentTasks('Test Component', 'A test component', 'Design content');
+      
+      expect(mockGetGenerativeModel).toHaveBeenCalledWith({ model: 'gemini-1.5-flash' });
+      expect(mockGenerateContent).toHaveBeenCalled();
+      expect(result).toBe('Generated content');
+    });
+
+    test('generateComponentTasks should generate tasks with project context', async () => {
+      const mockProjectSpec = {
+        sections: {
+          implementation: { content: 'Project implementation content' }
+        }
+      };
+      
+      const result = await generateComponentTasks('Test Component', 'A test component', 'Design content', mockProjectSpec);
       
       expect(mockGetGenerativeModel).toHaveBeenCalledWith({ model: 'gemini-1.5-flash' });
       expect(mockGenerateContent).toHaveBeenCalled();

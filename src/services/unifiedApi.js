@@ -386,42 +386,42 @@ export const unifiedApi = {
   
   // AI Generation services
   ai: {
-    generateComponentRequirements: async (componentName, componentDescription) => {
+    generateComponentRequirements: async (componentName, componentDescription, projectSpecification = null) => {
       try {
         const config = requestInterceptor({ 
           method: 'GENERATE_REQUIREMENTS', 
           resource: 'ai', 
-          data: { componentName, componentDescription } 
+          data: { componentName, componentDescription, projectSpecification } 
         });
-        const result = await generateComponentRequirements(componentName, componentDescription);
+        const result = await generateComponentRequirements(componentName, componentDescription, projectSpecification);
         return responseInterceptor(result);
       } catch (error) {
         throw errorInterceptor(error);
       }
     },
     
-    generateComponentDesign: async (componentName, componentDescription, requirements) => {
+    generateComponentDesign: async (componentName, componentDescription, requirements, projectSpecification = null) => {
       try {
         const config = requestInterceptor({ 
           method: 'GENERATE_DESIGN', 
           resource: 'ai', 
-          data: { componentName, componentDescription, requirements } 
+          data: { componentName, componentDescription, requirements, projectSpecification } 
         });
-        const result = await generateComponentDesign(componentName, componentDescription, requirements);
+        const result = await generateComponentDesign(componentName, componentDescription, requirements, projectSpecification);
         return responseInterceptor(result);
       } catch (error) {
         throw errorInterceptor(error);
       }
     },
     
-    generateComponentTasks: async (componentName, componentDescription, design) => {
+    generateComponentTasks: async (componentName, componentDescription, design, projectSpecification = null) => {
       try {
         const config = requestInterceptor({ 
           method: 'GENERATE_TASKS', 
           resource: 'ai', 
-          data: { componentName, componentDescription, design } 
+          data: { componentName, componentDescription, design, projectSpecification } 
         });
-        const result = await generateComponentTasks(componentName, componentDescription, design);
+        const result = await generateComponentTasks(componentName, componentDescription, design, projectSpecification);
         return responseInterceptor(result);
       } catch (error) {
         throw errorInterceptor(error);

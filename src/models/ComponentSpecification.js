@@ -4,6 +4,7 @@ export class ComponentSpecification {
     this.id = data.id || null;
     this.componentName = data.componentName || '';
     this.projectId = data.projectId || '';
+    this.projectSpecificationId = data.projectSpecificationId || ''; // New field for project specification reference
     this.componentDescription = data.componentDescription || '';
     this.requirements = data.requirements || {
       content: '',
@@ -63,6 +64,7 @@ export class ComponentSpecification {
       id: this.id,
       componentName: this.componentName,
       projectId: this.projectId,
+      projectSpecificationId: this.projectSpecificationId, // Include new field
       componentDescription: this.componentDescription,
       requirements: this.requirements,
       design: this.design,

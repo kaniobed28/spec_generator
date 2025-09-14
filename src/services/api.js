@@ -355,11 +355,27 @@ export const componentSpecificationApi = {
 };
 
 // AI Content Generation functions for component specifications
-const generateComponentRequirements = async (componentName, componentDescription) => {
+const generateComponentRequirements = async (componentName, componentDescription, projectSpecification = null) => {
   try {
     const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
     
-    const prompt = `Generate requirements in EARS (Easy Approach to Requirements Syntax) format for a component named "${componentName}" with the following description: "${componentDescription}".
+    let prompt = `Generate requirements in EARS (Easy Approach to Requirements Syntax) format for a component named "${componentName}" with the following description: "${componentDescription}".`;
+    
+    // Add project context if available
+    if (projectSpecification) {
+      prompt += `
+      
+      These requirements should align with the overall project specification:
+      Project Title: ${projectSpecification.title || 'Untitled Project'}
+      ${projectSpecification.sections ? `
+      Project Planning: ${projectSpecification.sections.planning?.content || ''}
+      Project Design: ${projectSpecification.sections.design?.content || ''}
+      Project Implementation: ${projectSpecification.sections.implementation?.content || ''}
+      ` : ''}
+      `;
+    }
+    
+    prompt += `
     
     Format each requirement as:
     WHEN [trigger or condition]
@@ -380,14 +396,25 @@ const generateComponentRequirements = async (componentName, componentDescription
   }
 };
 
-const generateComponentDesign = async (componentName, componentDescription, requirements) => {
+const generateComponentDesign = async (componentName, componentDescription, requirements, projectSpecification = null) => {
   try {
     const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
     
-    const prompt = `Generate technical design documentation for a component named "${componentName}" with the following description: "${componentDescription}".
+    let prompt = `Generate technical design documentation for a component named "${componentName}" with the following description: "${componentDescription}".
     
     The component should satisfy these requirements:
-    ${requirements}
+    ${requirements}`;
+    
+    // Add project context if available
+    if (projectSpecification) {
+      prompt += `
+      
+      This design should align with the overall project architecture:
+      ${projectSpecification.sections?.design?.content || 'No project design information available'}
+      `;
+    }
+    
+    prompt += `
     
     Please organize the response with the following sections:
     1. Architecture Overview
@@ -406,14 +433,25 @@ const generateComponentDesign = async (componentName, componentDescription, requ
   }
 };
 
-const generateComponentTasks = async (componentName, componentDescription, design) => {
+const generateComponentTasks = async (componentName, componentDescription, design, projectSpecification = null) => {
   try {
     const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
     
-    const prompt = `Generate implementation tasks for a component named "${componentName}" with the following description: "${componentDescription}".
+    let prompt = `Generate implementation tasks for a component named "${componentName}" with the following description: "${componentDescription}".
     
     The technical design is:
-    ${design}
+    ${design}`;
+    
+    // Add project context if available
+    if (projectSpecification) {
+      prompt += `
+      
+      These tasks should follow the project implementation approach:
+      ${projectSpecification.sections?.implementation?.content || 'No project implementation information available'}
+      `;
+    }
+    
+    prompt += `
     
     Please organize the response with the following sections:
     1. Task Breakdown (list discrete, trackable tasks)

@@ -7,6 +7,7 @@ describe('ComponentSpecification', () => {
     expect(spec.id).toBeNull();
     expect(spec.componentName).toBe('');
     expect(spec.projectId).toBe('');
+    expect(spec.projectSpecificationId).toBe(''); // New field test
     expect(spec.componentDescription).toBe('');
     expect(spec.requirements).toEqual({
       content: '',
@@ -30,6 +31,7 @@ describe('ComponentSpecification', () => {
       id: 'test-id',
       componentName: 'Test Component',
       projectId: 'project-123',
+      projectSpecificationId: 'spec-456', // New field
       componentDescription: 'A test component',
       requirements: {
         content: 'Test requirements',
@@ -51,6 +53,7 @@ describe('ComponentSpecification', () => {
     expect(spec.id).toBe('test-id');
     expect(spec.componentName).toBe('Test Component');
     expect(spec.projectId).toBe('project-123');
+    expect(spec.projectSpecificationId).toBe('spec-456'); // New field test
     expect(spec.componentDescription).toBe('A test component');
     expect(spec.requirements).toEqual({
       content: 'Test requirements',
@@ -71,6 +74,7 @@ describe('ComponentSpecification', () => {
     const spec = new ComponentSpecification({
       componentName: 'Valid Component',
       projectId: 'project-123',
+      projectSpecificationId: 'spec-456', // New field
       componentDescription: 'A valid component description that is long enough'
     });
     
@@ -83,6 +87,7 @@ describe('ComponentSpecification', () => {
   test('should validate component name is required', () => {
     const spec = new ComponentSpecification({
       projectId: 'project-123',
+      projectSpecificationId: 'spec-456', // New field
       componentDescription: 'A valid component description'
     });
     
@@ -96,6 +101,7 @@ describe('ComponentSpecification', () => {
     const spec = new ComponentSpecification({
       componentName: 'A'.repeat(101), // 101 characters, exceeds limit
       projectId: 'project-123',
+      projectSpecificationId: 'spec-456', // New field
       componentDescription: 'A valid component description'
     });
     
@@ -108,6 +114,7 @@ describe('ComponentSpecification', () => {
   test('should validate project ID is required', () => {
     const spec = new ComponentSpecification({
       componentName: 'Valid Component',
+      projectSpecificationId: 'spec-456', // New field
       componentDescription: 'A valid component description'
     });
     
@@ -121,6 +128,7 @@ describe('ComponentSpecification', () => {
     const spec = new ComponentSpecification({
       componentName: 'Valid Component',
       projectId: 'project-123',
+      projectSpecificationId: 'spec-456', // New field
       componentDescription: 'Short' // Less than 10 characters
     });
     
@@ -134,6 +142,7 @@ describe('ComponentSpecification', () => {
     const spec = new ComponentSpecification({
       componentName: 'Valid Component',
       projectId: 'project-123',
+      projectSpecificationId: 'spec-456', // New field
       componentDescription: 'A'.repeat(1001) // 1001 characters, exceeds limit
     });
     
@@ -147,6 +156,7 @@ describe('ComponentSpecification', () => {
     const spec = new ComponentSpecification({
       componentName: 'Invalid@Component!', // Contains invalid characters
       projectId: 'project-123',
+      projectSpecificationId: 'spec-456', // New field
       componentDescription: 'A valid component description that is long enough'
     });
     
@@ -161,6 +171,7 @@ describe('ComponentSpecification', () => {
       id: 'test-id',
       componentName: 'Test Component',
       projectId: 'project-123',
+      projectSpecificationId: 'spec-456', // New field
       componentDescription: 'A test component',
       requirements: {
         content: 'Test requirements',

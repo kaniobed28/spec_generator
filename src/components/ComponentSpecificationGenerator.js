@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Container,
   Typography,
@@ -33,6 +33,7 @@ const ComponentSpecificationGenerator = () => {
     componentName: '',
     componentDescription: ''
   });
+  const [projectSpecification, setProjectSpecification] = useState(null); // New state for project specification
   const [generatedSpecs, setGeneratedSpecs] = useState({
     requirements: '',
     design: '',
@@ -41,6 +42,23 @@ const ComponentSpecificationGenerator = () => {
   const [isGenerating, setIsGenerating] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [success, setSuccess] = useState('');
+
+  // Fetch project specification when component mounts
+  useEffect(() => {
+    const fetchProjectSpecification = async () => {
+      if (projectId) {
+        try {
+          const spec = await unifiedApi.specification.getByProjectId(projectId);
+          setProjectSpecification(spec);
+        } catch (err) {
+          console.error('Error fetching project specification:', err);
+          setError('Failed to fetch project specification. Generating component specifications without project context.');
+        }
+      }
+    };
+    
+    fetchProjectSpecification();
+  }, [projectId, setError]);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -77,24 +95,27 @@ const ComponentSpecificationGenerator = () => {
     setSuccess('');
 
     try {
-      // Generate requirements
+      // Generate requirements with project context
       const requirements = await unifiedApi.ai.generateComponentRequirements(
         componentData.componentName,
-        componentData.componentDescription
+        componentData.componentDescription,
+        projectSpecification
       );
 
-      // Generate design
+      // Generate design with project context
       const design = await unifiedApi.ai.generateComponentDesign(
         componentData.componentName,
         componentData.componentDescription,
-        requirements
+        requirements,
+        projectSpecification
       );
 
-      // Generate tasks
+      // Generate tasks with project context
       const tasks = await unifiedApi.ai.generateComponentTasks(
         componentData.componentName,
         componentData.componentDescription,
-        design
+        design,
+        projectSpecification
       );
 
       setGeneratedSpecs({
@@ -158,6 +179,7 @@ const ComponentSpecificationGenerator = () => {
     const specData = {
       componentName: componentData.componentName,
       projectId: projectId,
+      projectSpecificationId: projectSpecification?.id || '', // Add project specification reference
       componentDescription: componentData.componentDescription,
       requirements: {
         content: generatedSpecs.requirements,
@@ -280,6 +302,20 @@ const ComponentSpecificationGenerator = () => {
         <Typography variant="h4" component="h1" gutterBottom>
           Component Specification Generator
         </Typography>
+        
+        {/* Show when project context is being used */}
+        {projectSpecification && (
+          <Alert severity="info" sx={{ mb: 2 }}>
+            Generating specifications with project context: {projectSpecification.title || 'Untitled Project'}
+          </Alert>
+        )}
+        
+        {/* Show when project context is not available */}
+        {!projectSpecification && projectId && (
+          <Alert severity="warning" sx={{ mb: 2 }}>
+            No project specification found. Generating specifications without project context.
+          </Alert>
+        )}
         
         {(contextError) && (
           <Alert severity="error" sx={{ mb: 2 }}>{contextError}</Alert>
