@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import {
-  Container,
   Typography,
   TextField,
   Button,
@@ -11,10 +10,11 @@ import {
   Select,
   MenuItem,
   Alert,
-  CircularProgress
+  CircularProgress,
+  useTheme,
+  Grid
 } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
-import FileUpload from './FileUpload';
 import UserStoryInput from './UserStoryInput';
 import PerspectiveInput from './PerspectiveInput';
 import CriteriaInput from './CriteriaInput';
@@ -22,8 +22,10 @@ import RequirementInput from './RequirementInput';
 import AICommandInput from './AICommandInput';
 import { useSpecification } from '../contexts/SpecificationContext';
 import { unifiedApi } from '../services/unifiedApi';
+import ResponsiveContainer from './ResponsiveContainer';
 
 const ProjectInput = () => {
+  const theme = useTheme();
   const navigate = useNavigate();
   const { setLoading, setError, clearError, error } = useSpecification();
   const [projectData, setProjectData] = useState({
@@ -35,7 +37,6 @@ const ProjectInput = () => {
     acceptanceCriteria: [],
     customRequirements: []
   });
-  const [files, setFiles] = useState([]);
   const [isGenerating, setIsGenerating] = useState(false);
 
   const handleInputChange = (e) => {
@@ -53,10 +54,6 @@ const ProjectInput = () => {
     }));
   };
 
-  const handleFileUpload = (uploadedFiles) => {
-    setFiles(uploadedFiles);
-  };
-
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsGenerating(true);
@@ -65,8 +62,7 @@ const ProjectInput = () => {
     try {
       // Call the unified API to generate specifications
       const response = await unifiedApi.specification.generate({
-        ...projectData,
-        files
+        ...projectData
       });
       
       // Redirect to project specifications view
@@ -94,104 +90,167 @@ const ProjectInput = () => {
   };
 
   return (
-    <Container maxWidth="md" sx={{ mt: 4, mb: 4 }}>
-      <Paper elevation={3} sx={{ p: 4 }}>
-        <Typography variant="h4" component="h1" gutterBottom>
+    <ResponsiveContainer maxWidth="md" sx={{ mt: 4, mb: 4 }}>
+      <Paper 
+        elevation={3} 
+        sx={{ 
+          p: { xs: 2, sm: 4 },
+          borderRadius: theme.shape.borderRadius,
+          boxShadow: theme.shadows[2]
+        }}
+      >
+        <Typography 
+          variant="h4" 
+          component="h1" 
+          gutterBottom
+          sx={{
+            fontWeight: 600,
+            color: theme.palette.primary.main,
+            mb: 3
+          }}
+        >
           Generate Project Specifications
         </Typography>
         
         {error && (
-          <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>
+          <Alert 
+            severity="error" 
+            sx={{ 
+              mb: 2,
+              borderRadius: theme.shape.borderRadius
+            }}
+          >
+            {error}
+          </Alert>
         )}
         
         <AICommandInput onFieldsFilled={handleAIFillFields} />
         
         <Box component="form" onSubmit={handleSubmit} sx={{ mt: 3 }}>
-          <TextField
-            fullWidth
-            label="Project Name"
-            name="name"
-            value={projectData.name}
-            onChange={handleInputChange}
-            margin="normal"
-            required
-          />
-          
-          <TextField
-            fullWidth
-            label="Project Description"
-            name="description"
-            value={projectData.description}
-            onChange={handleInputChange}
-            margin="normal"
-            multiline
-            rows={4}
-            placeholder="Describe your project in detail..."
-          />
-          
-          <FormControl fullWidth margin="normal">
-            <InputLabel>Template</InputLabel>
-            <Select
-              value={projectData.template}
-              label="Template"
-              onChange={handleTemplateChange}
-            >
-              <MenuItem value="custom">Custom Project</MenuItem>
-              <MenuItem value="web-app">Web Application</MenuItem>
-              <MenuItem value="mobile-app">Mobile Application</MenuItem>
-              <MenuItem value="api">API Service</MenuItem>
-              <MenuItem value="data-analysis">Data Analysis</MenuItem>
-            </Select>
-          </FormControl>
-          
-          <UserStoryInput 
-            userStories={projectData.userStories} 
-            setUserStories={(userStories) => setProjectData(prev => ({ ...prev, userStories }))}
-          />
-          
-          <PerspectiveInput 
-            perspectives={projectData.perspectives} 
-            setPerspectives={(perspectives) => setProjectData(prev => ({ ...prev, perspectives }))}
-          />
-          
-          <CriteriaInput 
-            criteria={projectData.acceptanceCriteria} 
-            setCriteria={(acceptanceCriteria) => setProjectData(prev => ({ ...prev, acceptanceCriteria }))}
-          />
-          
-          <RequirementInput 
-            requirements={projectData.customRequirements} 
-            setRequirements={(customRequirements) => setProjectData(prev => ({ ...prev, customRequirements }))}
-          />
-          
-          <FileUpload onFileUpload={handleFileUpload} />
-          
-          <Box sx={{ mt: 3, position: 'relative' }}>
-            <Button
-              type="submit"
-              variant="contained"
-              size="large"
-              disabled={isGenerating}
-              fullWidth
-            >
-              {isGenerating ? 'Generating Specifications...' : 'Generate Specifications'}
-            </Button>
-            {isGenerating && (
-              <CircularProgress
-                size={24}
+          <Grid container spacing={3}>
+            <Grid item xs={12}>
+              <TextField
+                fullWidth
+                label="Project Name"
+                name="name"
+                value={projectData.name}
+                onChange={handleInputChange}
+                required
+                variant="outlined"
                 sx={{
-                  position: 'absolute',
-                  top: '50%',
-                  left: '50%',
-                  marginTop: '-12px',
-                  marginLeft: '-12px',
+                  '& .MuiOutlinedInput-root': {
+                    borderRadius: '8px'
+                  }
                 }}
               />
-            )}
-          </Box>
+            </Grid>
+            
+            <Grid item xs={12}>
+              <TextField
+                fullWidth
+                label="Project Description"
+                name="description"
+                value={projectData.description}
+                onChange={handleInputChange}
+                multiline
+                rows={4}
+                placeholder="Describe your project in detail..."
+                variant="outlined"
+                sx={{
+                  '& .MuiOutlinedInput-root': {
+                    borderRadius: '8px'
+                  }
+                }}
+              />
+            </Grid>
+            
+            <Grid item xs={12}>
+              <FormControl fullWidth>
+                <InputLabel>Template</InputLabel>
+                <Select
+                  value={projectData.template}
+                  label="Template"
+                  onChange={handleTemplateChange}
+                  sx={{
+                    borderRadius: '8px'
+                  }}
+                >
+                  <MenuItem value="custom">Custom Project</MenuItem>
+                  <MenuItem value="web-app">Web Application</MenuItem>
+                  <MenuItem value="mobile-app">Mobile Application</MenuItem>
+                  <MenuItem value="api">API Service</MenuItem>
+                  <MenuItem value="data-analysis">Data Analysis</MenuItem>
+                </Select>
+              </FormControl>
+            </Grid>
+            
+            <Grid item xs={12}>
+              <UserStoryInput 
+                userStories={projectData.userStories} 
+                setUserStories={(userStories) => setProjectData(prev => ({ ...prev, userStories }))}
+              />
+            </Grid>
+            
+            <Grid item xs={12}>
+              <PerspectiveInput 
+                perspectives={projectData.perspectives} 
+                setPerspectives={(perspectives) => setProjectData(prev => ({ ...prev, perspectives }))}
+              />
+            </Grid>
+            
+            <Grid item xs={12}>
+              <CriteriaInput 
+                criteria={projectData.acceptanceCriteria} 
+                setCriteria={(acceptanceCriteria) => setProjectData(prev => ({ ...prev, acceptanceCriteria }))}
+              />
+            </Grid>
+            
+            <Grid item xs={12}>
+              <RequirementInput 
+                requirements={projectData.customRequirements} 
+                setRequirements={(customRequirements) => setProjectData(prev => ({ ...prev, customRequirements }))}
+              />
+            </Grid>
+            
+            <Grid item xs={12}>
+              <Box sx={{ mt: 4, position: 'relative' }}>
+                <Button
+                  type="submit"
+                  variant="contained"
+                  size="large"
+                  disabled={isGenerating}
+                  fullWidth
+                  sx={{
+                    py: 1.5,
+                    borderRadius: '8px',
+                    fontWeight: 600,
+                    fontSize: '1rem',
+                    boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
+                    '&:hover': {
+                      boxShadow: '0 6px 8px rgba(0, 0, 0, 0.15)'
+                    }
+                  }}
+                >
+                  {isGenerating ? 'Generating Specifications...' : 'Generate Specifications'}
+                </Button>
+                {isGenerating && (
+                  <CircularProgress
+                    size={24}
+                    sx={{
+                      position: 'absolute',
+                      top: '50%',
+                      left: '50%',
+                      marginTop: '-12px',
+                      marginLeft: '-12px',
+                    }}
+                  />
+                )}
+              </Box>
+            </Grid>
+          </Grid>
         </Box>
       </Paper>
-    </Container>
+    </ResponsiveContainer>
   );
 };
 

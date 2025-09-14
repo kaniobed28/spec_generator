@@ -12,14 +12,18 @@ import {
   Button,
   Alert,
   CircularProgress,
-  Divider
+  Divider,
+  useTheme,
+  Grid
 } from '@mui/material';
 import { Link, useParams } from 'react-router-dom';
 import { Delete, Visibility, Add } from '@mui/icons-material';
 import { useSpecification } from '../contexts/SpecificationContext';
 import { unifiedApi } from '../services/unifiedApi';
+import SpecificationCard from './SpecificationCard';
 
 const ComponentSpecificationList = () => {
+  const theme = useTheme();
   const { id: projectId } = useParams();
   const { 
     componentSpecifications, 
@@ -65,6 +69,28 @@ const ComponentSpecificationList = () => {
     }
   };
 
+  const handleExport = (content, filename) => {
+    if (!content) {
+      setError('No content to export');
+      return;
+    }
+    
+    try {
+      const blob = new Blob([content], { type: 'text/markdown' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+    } catch (err) {
+      setError('Failed to export file. Please try again.');
+      console.error('Error exporting file:', err);
+    }
+  };
+
   // Get specifications for this project from context
   const projectSpecs = componentSpecifications[projectId] || [];
 
@@ -79,16 +105,37 @@ const ComponentSpecificationList = () => {
   if (error) {
     return (
       <Container maxWidth="md" sx={{ mt: 4, mb: 4 }}>
-        <Alert severity="error">{error}</Alert>
+        <Alert 
+          severity="error"
+          sx={{ 
+            borderRadius: theme.shape.borderRadius
+          }}
+        >
+          {error}
+        </Alert>
       </Container>
     );
   }
 
   return (
-    <Container maxWidth="md" sx={{ mt: 4, mb: 4 }}>
-      <Paper elevation={3} sx={{ p: 3 }}>
+    <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
+      <Paper 
+        elevation={3} 
+        sx={{ 
+          p: { xs: 2, sm: 3 },
+          borderRadius: theme.shape.borderRadius,
+          boxShadow: theme.shadows[2]
+        }}
+      >
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
-          <Typography variant="h4" component="h1">
+          <Typography 
+            variant="h4" 
+            component="h1"
+            sx={{
+              fontWeight: 600,
+              color: theme.palette.primary.main
+            }}
+          >
             Component Specifications
           </Typography>
           <Button
@@ -96,48 +143,46 @@ const ComponentSpecificationList = () => {
             startIcon={<Add />}
             component={Link}
             to={`/projects/${projectId}/specifications/generate`}
+            sx={{
+              py: 1,
+              px: 2,
+              borderRadius: '8px',
+              fontWeight: 600,
+              boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
+              '&:hover': {
+                boxShadow: '0 6px 8px rgba(0, 0, 0, 0.15)'
+              }
+            }}
           >
             New Specification
           </Button>
         </Box>
 
         {projectSpecs.length === 0 ? (
-          <Alert severity="info">
+          <Alert 
+            severity="info"
+            sx={{ 
+              borderRadius: theme.shape.borderRadius
+            }}
+          >
             No component specifications found. Create your first specification!
           </Alert>
         ) : (
-          <List>
+          <Grid container spacing={3}>
             {projectSpecs.map((spec) => (
-              <React.Fragment key={spec.id}>
-                <ListItem>
-                  <ListItemText
-                    primary={spec.componentName}
-                    secondary={`Created: ${new Date(spec.createdAt).toLocaleDateString()}`}
-                  />
-                  <ListItemSecondaryAction>
-                    <IconButton
-                      component={Link}
-                      to={`/component-specifications/${spec.id}`}
-                      edge="end"
-                      aria-label="view"
-                      sx={{ mr: 1 }}
-                    >
-                      <Visibility />
-                    </IconButton>
-                    <IconButton
-                      edge="end"
-                      aria-label="delete"
-                      onClick={() => handleDelete(spec.id)}
-                      disabled={localLoading}
-                    >
-                      <Delete />
-                    </IconButton>
-                  </ListItemSecondaryAction>
-                </ListItem>
-                <Divider />
-              </React.Fragment>
+              <Grid item xs={12} md={6} lg={4} key={spec.id}>
+                <SpecificationCard
+                  title={spec.componentName}
+                  content={spec.requirements?.content || spec.design?.content || spec.tasks?.content || 'No content available'}
+                  exportFilename={`${spec.componentName}-specification.md`}
+                  onExport={handleExport}
+                  onView={() => window.location.href = `#/component-specifications/${spec.id}`}
+                  showViewButton={true}
+                  showExportButton={true}
+                />
+              </Grid>
             ))}
-          </List>
+          </Grid>
         )}
       </Paper>
     </Container>

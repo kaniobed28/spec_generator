@@ -3,7 +3,6 @@ import {
   Container,
   Typography,
   TextField,
-  Button,
   Box,
   Paper,
   Alert,
@@ -11,14 +10,19 @@ import {
   Grid,
   Card,
   CardContent,
-  CardActions
+  CardActions,
+  useTheme
 } from '@mui/material';
 import { ComponentSpecification } from '../models/ComponentSpecification';
 import { useSpecification } from '../contexts/SpecificationContext';
 import { unifiedApi } from '../services/unifiedApi';
 import { useNavigate, useParams } from 'react-router-dom';
+import AccessibleButton from './AccessibleButton';
+import ResponsiveContainer from './ResponsiveContainer';
+import SpecificationCard from './SpecificationCard';
 
 const ComponentSpecificationGenerator = () => {
+  const theme = useTheme();
   const { id: projectId } = useParams();
   const navigate = useNavigate();
   const { 
@@ -33,7 +37,7 @@ const ComponentSpecificationGenerator = () => {
     componentName: '',
     componentDescription: ''
   });
-  const [projectSpecification, setProjectSpecification] = useState(null); // New state for project specification
+  const [projectSpecification, setProjectSpecification] = useState(null);
   const [generatedSpecs, setGeneratedSpecs] = useState({
     requirements: '',
     design: '',
@@ -179,7 +183,7 @@ const ComponentSpecificationGenerator = () => {
     const specData = {
       componentName: componentData.componentName,
       projectId: projectId,
-      projectSpecificationId: projectSpecification?.id || '', // Add project specification reference
+      projectSpecificationId: projectSpecification?.id || '',
       componentDescription: componentData.componentDescription,
       requirements: {
         content: generatedSpecs.requirements,
@@ -297,32 +301,76 @@ const ComponentSpecificationGenerator = () => {
   };
 
   return (
-    <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
-      <Paper elevation={3} sx={{ p: 4 }}>
-        <Typography variant="h4" component="h1" gutterBottom>
+    <ResponsiveContainer maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
+      <Paper 
+        elevation={3} 
+        sx={{ 
+          p: { xs: 2, sm: 4 },
+          borderRadius: theme.shape.borderRadius,
+          boxShadow: theme.shadows[2]
+        }}
+      >
+        <Typography 
+          variant="h4" 
+          component="h1" 
+          gutterBottom
+          sx={{
+            fontWeight: 600,
+            color: theme.palette.primary.main,
+            mb: 3
+          }}
+        >
           Component Specification Generator
         </Typography>
         
         {/* Show when project context is being used */}
         {projectSpecification && (
-          <Alert severity="info" sx={{ mb: 2 }}>
+          <Alert 
+            severity="info" 
+            sx={{ 
+              mb: 2,
+              borderRadius: theme.shape.borderRadius
+            }}
+          >
             Generating specifications with project context: {projectSpecification.title || 'Untitled Project'}
           </Alert>
         )}
         
         {/* Show when project context is not available */}
         {!projectSpecification && projectId && (
-          <Alert severity="warning" sx={{ mb: 2 }}>
+          <Alert 
+            severity="warning" 
+            sx={{ 
+              mb: 2,
+              borderRadius: theme.shape.borderRadius
+            }}
+          >
             No project specification found. Generating specifications without project context.
           </Alert>
         )}
         
         {(contextError) && (
-          <Alert severity="error" sx={{ mb: 2 }}>{contextError}</Alert>
+          <Alert 
+            severity="error" 
+            sx={{ 
+              mb: 2,
+              borderRadius: theme.shape.borderRadius
+            }}
+          >
+            {contextError}
+          </Alert>
         )}
         
         {success && (
-          <Alert severity="success" sx={{ mb: 2 }}>{success}</Alert>
+          <Alert 
+            severity="success" 
+            sx={{ 
+              mb: 2,
+              borderRadius: theme.shape.borderRadius
+            }}
+          >
+            {success}
+          </Alert>
         )}
         
         <Box component="form" sx={{ mt: 3 }}>
@@ -334,10 +382,15 @@ const ComponentSpecificationGenerator = () => {
                 name="componentName"
                 value={componentData.componentName}
                 onChange={handleInputChange}
-                margin="normal"
                 required
+                variant="outlined"
                 helperText="Alphanumeric characters, spaces, and hyphens only (max 100 characters)"
                 error={contextError && contextError.includes('Component name')}
+                sx={{
+                  '& .MuiOutlinedInput-root': {
+                    borderRadius: '8px'
+                  }
+                }}
               />
             </Grid>
             
@@ -348,18 +401,23 @@ const ComponentSpecificationGenerator = () => {
                 name="componentDescription"
                 value={componentData.componentDescription}
                 onChange={handleInputChange}
-                margin="normal"
                 multiline
                 rows={4}
                 required
                 placeholder="Describe the component in detail (10-1000 characters)..."
+                variant="outlined"
                 error={contextError && contextError.includes('Component description')}
                 helperText={`${componentData.componentDescription.length}/1000 characters`}
+                sx={{
+                  '& .MuiOutlinedInput-root': {
+                    borderRadius: '8px'
+                  }
+                }}
               />
             </Grid>
             
             <Grid item xs={12}>
-              <Button
+              <AccessibleButton
                 variant="contained"
                 size="large"
                 onClick={handleGenerateSpecifications}
@@ -374,7 +432,7 @@ const ComponentSpecificationGenerator = () => {
                 ) : (
                   'Generate Specifications'
                 )}
-              </Button>
+              </AccessibleButton>
             </Grid>
           </Grid>
         </Box>
@@ -382,94 +440,61 @@ const ComponentSpecificationGenerator = () => {
         {/* Generated Specifications Preview */}
         {generatedSpecs.requirements || generatedSpecs.design || generatedSpecs.tasks ? (
           <Box sx={{ mt: 4 }}>
-            <Typography variant="h5" gutterBottom>
+            <Typography 
+              variant="h5" 
+              gutterBottom
+              sx={{
+                fontWeight: 600,
+                mb: 2,
+                color: theme.palette.text.primary
+              }}
+            >
               Generated Specifications
             </Typography>
             
             <Grid container spacing={3}>
               {/* Requirements Card */}
               <Grid item xs={12} md={4}>
-                <Card variant="outlined">
-                  <CardContent>
-                    <Typography variant="h6" gutterBottom>
-                      Requirements
-                    </Typography>
-                    <Box sx={{ maxHeight: 200, overflow: 'auto' }}>
-                      <pre style={{ whiteSpace: 'pre-wrap', fontSize: '0.8rem' }}>
-                        {generatedSpecs.requirements}
-                      </pre>
-                    </Box>
-                  </CardContent>
-                  <CardActions>
-                    <Button 
-                      size="small" 
-                      onClick={() => handleExport(generatedSpecs.requirements, `${componentData.componentName}-requirements.md`)}
-                      disabled={!generatedSpecs.requirements}
-                    >
-                      Export
-                    </Button>
-                  </CardActions>
-                </Card>
+                <SpecificationCard
+                  title="Requirements"
+                  content={generatedSpecs.requirements}
+                  exportFilename={`${componentData.componentName}-requirements.md`}
+                  onExport={handleExport}
+                  showExportButton={true}
+                />
               </Grid>
               
               {/* Design Card */}
               <Grid item xs={12} md={4}>
-                <Card variant="outlined">
-                  <CardContent>
-                    <Typography variant="h6" gutterBottom>
-                      Design
-                    </Typography>
-                    <Box sx={{ maxHeight: 200, overflow: 'auto' }}>
-                      <pre style={{ whiteSpace: 'pre-wrap', fontSize: '0.8rem' }}>
-                        {generatedSpecs.design}
-                      </pre>
-                    </Box>
-                  </CardContent>
-                  <CardActions>
-                    <Button 
-                      size="small" 
-                      onClick={() => handleExport(generatedSpecs.design, `${componentData.componentName}-design.md`)}
-                      disabled={!generatedSpecs.design}
-                    >
-                      Export
-                    </Button>
-                  </CardActions>
-                </Card>
+                <SpecificationCard
+                  title="Design"
+                  content={generatedSpecs.design}
+                  exportFilename={`${componentData.componentName}-design.md`}
+                  onExport={handleExport}
+                  showExportButton={true}
+                />
               </Grid>
               
               {/* Tasks Card */}
               <Grid item xs={12} md={4}>
-                <Card variant="outlined">
-                  <CardContent>
-                    <Typography variant="h6" gutterBottom>
-                      Tasks
-                    </Typography>
-                    <Box sx={{ maxHeight: 200, overflow: 'auto' }}>
-                      <pre style={{ whiteSpace: 'pre-wrap', fontSize: '0.8rem' }}>
-                        {generatedSpecs.tasks}
-                      </pre>
-                    </Box>
-                  </CardContent>
-                  <CardActions>
-                    <Button 
-                      size="small" 
-                      onClick={() => handleExport(generatedSpecs.tasks, `${componentData.componentName}-tasks.md`)}
-                      disabled={!generatedSpecs.tasks}
-                    >
-                      Export
-                    </Button>
-                  </CardActions>
-                </Card>
+                <SpecificationCard
+                  title="Tasks"
+                  content={generatedSpecs.tasks}
+                  exportFilename={`${componentData.componentName}-tasks.md`}
+                  onExport={handleExport}
+                  showExportButton={true}
+                />
               </Grid>
             </Grid>
             
-            <Box sx={{ mt: 3, textAlign: 'center' }}>
-              <Button
+            <Box sx={{ mt: 4, textAlign: 'center' }}>
+              <AccessibleButton
                 variant="contained"
                 color="primary"
                 size="large"
                 onClick={handleSaveSpecifications}
                 disabled={isSaving || loading.general}
+                sx={{ mr: { xs: 0, sm: 2 }, mb: { xs: 2, sm: 0 } }}
               >
                 {isSaving || loading.general ? (
                   <>
@@ -479,20 +504,19 @@ const ComponentSpecificationGenerator = () => {
                 ) : (
                   'Save Specifications'
                 )}
-              </Button>
-              <Button
+              </AccessibleButton>
+              <AccessibleButton
                 variant="outlined"
                 size="large"
                 onClick={() => navigate(`/projects/${projectId}/specifications`)}
-                sx={{ ml: 2 }}
               >
                 Cancel
-              </Button>
+              </AccessibleButton>
             </Box>
           </Box>
         ) : null}
       </Paper>
-    </Container>
+    </ResponsiveContainer>
   );
 };
 

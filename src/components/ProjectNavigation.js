@@ -57,6 +57,7 @@ const ProjectNavigation = () => {
     >
       <Drawer
         variant={isMobile ? 'temporary' : 'permanent'}
+        anchor="right"
         sx={{
           width: drawerWidth,
           flexShrink: 0,
@@ -64,7 +65,8 @@ const ProjectNavigation = () => {
             width: drawerWidth, 
             boxSizing: 'border-box',
             mt: { md: 8 },
-            height: { md: 'calc(100% - 64px)' }
+            height: { md: 'calc(100% - 64px)' },
+            top: { md: 64 }
           },
         }}
         ModalProps={{

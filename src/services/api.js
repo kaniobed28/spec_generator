@@ -22,7 +22,7 @@ import {
 const genAI = new GoogleGenerativeAI(process.env.REACT_APP_GEMINI_API_KEY || 'your-default-api-key');
 
 // Function to generate specification content using Gemini
-const generateSpecificationContent = async (name, description, template, files, userStories = [], perspectives = [], acceptanceCriteria = [], customRequirements = []) => {
+const generateSpecificationContent = async (name, description, template, userStories = [], perspectives = [], acceptanceCriteria = [], customRequirements = []) => {
   try {
     // Get the generative model
     const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
@@ -35,7 +35,7 @@ const generateSpecificationContent = async (name, description, template, files, 
       prompt += `
 
 User Stories:
-${userStories.map(story => `- As a user, I want ${story.what} so that ${story.why}`).join('\\n')}`;
+${userStories.map(story => `- As a user, I want ${story.what} so that ${story.why}`).join('\n')}`;
     }
 
     // Add perspectives to the prompt if provided
@@ -43,7 +43,7 @@ ${userStories.map(story => `- As a user, I want ${story.what} so that ${story.wh
       prompt += `
 
 Perspectives:
-${perspectives.map(p => `- From ${p.role} perspective: ${p.viewpoint}`).join('\\n')}`;
+${perspectives.map(p => `- From ${p.role} perspective: ${p.viewpoint}`).join('\n')}`;
     }
 
     // Add acceptance criteria to the prompt if provided
@@ -51,7 +51,7 @@ ${perspectives.map(p => `- From ${p.role} perspective: ${p.viewpoint}`).join('\\
       prompt += `
 
 Acceptance Criteria:
-${acceptanceCriteria.map((c, i) => `${i+1}. ${c.description}`).join('\\n')}`;
+${acceptanceCriteria.map((c, i) => `${i+1}. ${c.description}`).join('\n')}`;
     }
 
     // Add custom requirements to the prompt if provided
@@ -59,7 +59,7 @@ ${acceptanceCriteria.map((c, i) => `${i+1}. ${c.description}`).join('\\n')}`;
       prompt += `
 
 Custom Requirements:
-${customRequirements.map(r => `- ${r.description}`).join('\\n')}`;
+${customRequirements.map(r => `- ${r.description}`).join('\n')}`;
     }
 
     prompt += `\n\nPlease organize the response in the following sections with appropriate markdown headings:
@@ -68,7 +68,7 @@ ${customRequirements.map(r => `- ${r.description}`).join('\\n')}`;
 3. Implementation: Technology stack recommendations, coding standards, file structure, and API specifications
 4. Tasks: Development tasks breakdown, assignment recommendations, dependencies, and milestones
 
-Format the response as markdown with proper headings and lists. Do not include any additional text or explanations outside of these sections.`;
+Format the response as code with proper headings and lists. Do not include any additional text or explanations outside of these sections.`;
     
     // Generate content
     const result = await model.generateContent(prompt);
@@ -185,7 +185,7 @@ Based on the project requirements, the following technology stack is recommended
 
 ## File Structure
 
-\`\`\`
+\`\`
 src/
 ├── components/
 ├── pages/
@@ -280,7 +280,6 @@ export const specificationApi = {
       projectData.name, 
       projectData.description, 
       projectData.template, 
-      projectData.files,
       projectData.userStories,
       projectData.perspectives,
       projectData.acceptanceCriteria,
@@ -422,7 +421,7 @@ const generateComponentDesign = async (componentName, componentDescription, requ
     3. Interaction Diagrams (describe in text)
     4. Data Flow
     
-    Format the response as markdown with proper headings.`;
+    Format the response as code with proper headings.`;
     
     const result = await model.generateContent(prompt);
     const response = await result.response;
@@ -458,7 +457,7 @@ const generateComponentTasks = async (componentName, componentDescription, desig
     2. Dependencies (prerequisites for each task)
     3. Expected Outcomes (clear definition of task completion)
     
-    Format the response as markdown with proper headings.`;
+    Format the response as code with proper headings.`;
     
     const result = await model.generateContent(prompt);
     const response = await result.response;

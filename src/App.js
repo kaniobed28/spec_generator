@@ -1,17 +1,21 @@
+import React, { Suspense } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import './App.css';
 import Header from './components/Header';
-import ProjectInput from './components/ProjectInput';
-import SpecificationViewer from './components/SpecificationViewer';
-import ComponentSpecificationGenerator from './components/ComponentSpecificationGenerator';
-import ComponentSpecificationViewer from './components/ComponentSpecificationViewer';
-import ComponentSpecificationList from './components/ComponentSpecificationList';
-import ProjectsPage from './components/ProjectsPage';
-import ComponentsPage from './components/ComponentsPage';
 import { SpecificationProvider } from './contexts/SpecificationContext';
 import { Box, Toolbar } from '@mui/material';
 import ProjectNavigation from './components/ProjectNavigation';
 import BreadcrumbsNav from './components/BreadcrumbsNav';
+import LoadingSpinner from './components/LoadingSpinner';
+
+// Lazy load components for better performance
+const ProjectInput = React.lazy(() => import('./components/ProjectInput'));
+const SpecificationViewer = React.lazy(() => import('./components/SpecificationViewer'));
+const ComponentSpecificationGenerator = React.lazy(() => import('./components/ComponentSpecificationGenerator'));
+const ComponentSpecificationViewer = React.lazy(() => import('./components/ComponentSpecificationViewer'));
+const ComponentSpecificationList = React.lazy(() => import('./components/ComponentSpecificationList'));
+const ProjectsPage = React.lazy(() => import('./components/ProjectsPage'));
+const ComponentsPage = React.lazy(() => import('./components/ComponentsPage'));
 
 function App() {
   return (
@@ -23,37 +27,73 @@ function App() {
           <BreadcrumbsNav />
           <Box sx={{ display: 'flex' }}>
             <Routes>
-              <Route path="/" element={<ProjectInput />} />
-              <Route path="/projects" element={<ProjectsPage />} />
-              <Route path="/components" element={<ComponentsPage />} />
+              <Route path="/" element={
+                <Suspense fallback={<LoadingSpinner message="Loading home page..." />}>
+                  <ProjectInput />
+                </Suspense>
+              } />
+              <Route path="/projects" element={
+                <Suspense fallback={<LoadingSpinner message="Loading projects..." />}>
+                  <ProjectsPage />
+                </Suspense>
+              } />
+              <Route path="/components" element={
+                <Suspense fallback={<LoadingSpinner message="Loading components..." />}>
+                  <ComponentsPage />
+                </Suspense>
+              } />
               <Route path="/projects/:id" element={
                 <>
-                  <ProjectNavigation />
-                  <Box component="main" sx={{ flexGrow: 1, p: 3 }}>
-                    <SpecificationViewer />
+                  <Box component="main" sx={{ 
+                    flexGrow: 1, 
+                    p: 3,
+                    width: { md: `calc(100% - 240px)` }
+                  }}>
+                    <Suspense fallback={<LoadingSpinner message="Loading specification..." />}>
+                      <SpecificationViewer />
+                    </Suspense>
                   </Box>
+                  <ProjectNavigation />
                 </>
               } />
               <Route path="/projects/:id/specifications" element={
                 <>
-                  <ProjectNavigation />
-                  <Box component="main" sx={{ flexGrow: 1, p: 3 }}>
-                    <ComponentSpecificationList />
+                  <Box component="main" sx={{ 
+                    flexGrow: 1, 
+                    p: 3,
+                    width: { md: `calc(100% - 240px)` }
+                  }}>
+                    <Suspense fallback={<LoadingSpinner message="Loading component specifications..." />}>
+                      <ComponentSpecificationList />
+                    </Suspense>
                   </Box>
+                  <ProjectNavigation />
                 </>
               } />
               <Route path="/projects/:id/specifications/generate" element={
                 <>
-                  <ProjectNavigation />
-                  <Box component="main" sx={{ flexGrow: 1, p: 3 }}>
-                    <ComponentSpecificationGenerator />
+                  <Box component="main" sx={{ 
+                    flexGrow: 1, 
+                    p: 3,
+                    width: { md: `calc(100% - 240px)` }
+                  }}>
+                    <Suspense fallback={<LoadingSpinner message="Loading generator..." />}>
+                      <ComponentSpecificationGenerator />
+                    </Suspense>
                   </Box>
+                  <ProjectNavigation />
                 </>
               } />
-              <Route path="/component-specifications/:id" element={<ComponentSpecificationViewer />} />
+              <Route path="/component-specifications/:id" element={
+                <Suspense fallback={<LoadingSpinner message="Loading component specification..." />}>
+                  <ComponentSpecificationViewer />
+                </Suspense>
+              } />
               <Route path="/debug/component-specifications" element={
                 <Box component="main" sx={{ flexGrow: 1, p: 3 }}>
-                  <ComponentsPage />
+                  <Suspense fallback={<LoadingSpinner message="Loading debug page..." />}>
+                    <ComponentsPage />
+                  </Suspense>
                 </Box>
               } />
             </Routes>
